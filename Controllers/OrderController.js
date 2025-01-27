@@ -90,9 +90,9 @@ exports.BuyProduct = [
     .isLength({ min: 1 })
     .withMessage("ReturnURL is required")
     .matches(
-      /^https:\/\/(anbibu\.(pro\.et|netlify\.app)|localhost:(5173|3000))\/product\/[a-zA-Z0-9]+$/
+      /^https:\/\/(shemsu\.(pro\.et|netlify\.app)|localhost:(5173|3000))\/product\/[a-zA-Z0-9]+$/
     )
-    .withMessage("Invalid First Name"),
+    .withMessage("Invalid Return URL"),
 
   async (req, res) => {
     const {
