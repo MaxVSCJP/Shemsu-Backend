@@ -25,6 +25,7 @@ const corsOptions = {
     "https://shemsu.netlify.app",
     "https://anbibu.pro.et",
     "https://localhost:5173",
+    "http://localhost:5173",
     "https://localhost:3000",
     "*",
   ],

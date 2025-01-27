@@ -20,6 +20,7 @@ const transporter = emailer.createTransport({
 const axiosInstance = axios.create({
   httpsAgent: new https.Agent({
     rejectUnauthorized: false, // Ignore self-signed certificate errors
+    secureProtocol: "TLSv1_2_method", // Use TLSv1.2
   }),
 });
 
@@ -124,14 +125,6 @@ exports.BuyProduct = [
     const TEXT_REF = "tx-anbibuProductBuy-" + Date.now();
 
     const customData = `${ProductName}   ${ProductId}   ${Quantity}`;
-    console.log(customData);
-    /* 
-    ProductName,
-      ProductId,
-      OwnerId,
-      Phone,
-      Quantity,
-      BuyerEmail, */
 
     const data = {
       amount: `${Price * Quantity}`,
@@ -148,17 +141,14 @@ exports.BuyProduct = [
       },
     };
 
-    fetch(CHAPA_URL, {
-      method: "POST",
-      headers: config.headers,
-      body: JSON.stringify(data),
-    })
+    await axiosInstance
+      .post(CHAPA_URL, data, config)
       .then((response) => {
         res.status(200).json({ checkout_url: response.data.data.checkout_url });
         setTimeout(async () => {
-          fetch(CALLBACK_URL + TEXT_REF).catch((err) =>
-            console.log("First error: ", err.message)
-          );
+          axiosInstance
+            .get(CALLBACK_URL + TEXT_REF)
+            .catch((err) => console.log("First error: ", err));
         }, 10000);
       })
       .catch((err) => console.log("making payment error", err.message));
@@ -265,23 +255,6 @@ exports.VerifyPayment = async (req, res) => {
 
       try {
         user = await User.findById(OwnerId);
-        // const transferData = {
-        //   account_name: user.name,
-        //   account_number: user.BankAccount,
-        //   amount: amount * 0.95,
-        //   currency: "ETB",
-        //   reference:
-        //     "tx-anbibuProductTransfer-" +
-        //     ProductId +
-        //     "-" +
-        //     user.name +
-        //     "-" +
-        //     Date.now(),
-        //   bank_code: 946,
-        // };
-        // console.log("here7");
-        // console.log(transferData);
-
         var raw = {
           account_name: user.name,
           account_number: user.BankAccount,
@@ -330,7 +303,7 @@ exports.VerifyPayment = async (req, res) => {
             Seller Name: ${user.name}\n
             Seller Phone Number: ${user.phone}`,
           });
-          res.status(201).json({ message: "Verification email sent." });
+          console.log("Email sent successfully");
         } catch (err) {
           console.log("sending mail error", err);
           if (!res.headersSent) {
