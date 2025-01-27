@@ -148,14 +148,17 @@ exports.BuyProduct = [
       },
     };
 
-    await axiosInstance
-      .post(CHAPA_URL, data, config)
+    fetch(CHAPA_URL, {
+      method: "POST",
+      headers: config.headers,
+      body: JSON.stringify(data),
+    })
       .then((response) => {
         res.status(200).json({ checkout_url: response.data.data.checkout_url });
         setTimeout(async () => {
-          await axiosInstance
-            .get(CALLBACK_URL + TEXT_REF)
-            .catch((err) => console.log("First error: ", err.message));
+          fetch(CALLBACK_URL + TEXT_REF).catch((err) =>
+            console.log("First error: ", err.message)
+          );
         }, 10000);
       })
       .catch((err) => console.log("making payment error", err.message));
